@@ -1,0 +1,427 @@
+/* Updated: 2025-10-15T11:10:51.447Z */
+/* Updated: 2025-10-15T11:08:26.578Z */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* Shadcn/UI colors - Dark Theme */
+  --color-background: #0a0a0a;
+  --color-foreground: #ffffff;
+
+  --color-card: #1a1a1a;
+  --color-card-foreground: #ffffff;
+
+  --color-popover: #1a1a1a;
+  --color-popover-foreground: #ffffff;
+
+  --color-primary: #10b981;
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #2a2a2a;
+  --color-secondary-foreground: #ffffff;
+
+  --color-muted: #2a2a2a;
+  --color-muted-foreground: #9ca3af;
+
+  --color-accent: #10b981;
+  --color-accent-foreground: #ffffff;
+
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
+  --color-border: #374151;
+  --color-input: #2a2a2a;
+  --color-ring: #10b981;
+
+  --color-chart-1: #10b981;
+  --color-chart-2: #ef4444;
+  --color-chart-3: #d1d5db;
+  --color-chart-4: #9ca3af;
+  --color-chart-5: #4b5563;
+
+  --radius-lg: 0.75rem; /* 12px */
+  --radius-md: calc(0.75rem - 2px); /* 10px */
+  --radius-sm: calc(0.75rem - 4px); /* 8px */
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  /* Custom Design System Colors */
+  --color-background-primary: #0a0a0a;
+  --color-background-secondary: #1a1a1a;
+  --color-background-tertiary: #2a2a2a;
+
+  --color-brand-primary: #10b981;
+  --color-brand-secondary: #059669;
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #d1d5db;
+  --color-text-muted: #9ca3af;
+
+  --color-error: #ef4444;
+  --color-success: #10b981;
+
+  --color-border-light: #4b5563;
+
+  /* Custom Design System Typography */
+  --font-display: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --text-hero-headline: 56px;
+  --font-weight-hero-headline: 800;
+  --leading-hero-headline: 1.1;
+  --tracking-hero-headline: -0.02em;
+
+  --text-section-heading: 42px;
+  --font-weight-section-heading: 700;
+  --leading-section-heading: 1.2;
+  --tracking-section-heading: -0.01em;
+
+  --text-subsection-heading: 32px;
+  --font-weight-subsection-heading: 700;
+  --leading-subsection-heading: 1.3;
+  --tracking-subsection-heading: -0.01em;
+
+  --text-card-title: 24px;
+  --font-weight-card-title: 600;
+  --leading-card-title: 1.4;
+  --tracking-card-title: 0;
+
+  --text-body-large: 20px;
+  --font-weight-body-large: 400;
+  --leading-body-large: 1.6;
+  --tracking-body-large: 0;
+
+  --text-body-regular: 16px;
+  --font-weight-body-regular: 400;
+  --leading-body-regular: 1.6;
+  --tracking-body-regular: 0;
+
+  --text-body-small: 14px;
+  --font-weight-body-small: 400;
+  --leading-body-small: 1.5;
+  --tracking-body-small: 0;
+
+  --text-cta-button: 18px;
+  --font-weight-cta-button: 600;
+  --leading-cta-button: 1.2;
+  --tracking-cta-button: 0.01em;
+
+  --text-label-badge: 14px;
+  --font-weight-label-badge: 600;
+  --leading-label-badge: 1.2;
+  --tracking-label-badge: 0.02em;
+
+  --text-price-large: 48px;
+  --font-weight-price-large: 700;
+  --leading-price-large: 1;
+  --tracking-price-large: -0.02em;
+
+  --text-price-strikethrough: 32px;
+  --font-weight-price-strikethrough: 500;
+  --leading-price-strikethrough: 1.2;
+  --tracking-price-strikethrough: 0;
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border);
+  }
+}
+
+@layer base {
+  :root {
+    --background: var(--color-background);
+    --foreground: var(--color-foreground);
+    --card: var(--color-card);
+    --card-foreground: var(--color-card-foreground);
+    --popover: var(--color-popover);
+    --popover-foreground: var(--color-popover-foreground);
+    --primary: var(--color-primary);
+    --primary-foreground: var(--color-primary-foreground);
+    --secondary: var(--color-secondary);
+    --secondary-foreground: var(--color-secondary-foreground);
+    --muted: var(--color-muted);
+    --muted-foreground: var(--color-muted-foreground);
+    --accent: var(--color-accent);
+    --accent-foreground: var(--color-accent-foreground);
+    --destructive: var(--color-destructive);
+    --destructive-foreground: var(--color-destructive-foreground);
+    --border: var(--color-border);
+    --input: var(--color-input);
+    --ring: var(--color-ring);
+    --chart-1: var(--color-chart-1);
+    --chart-2: var(--color-chart-2);
+    --chart-3: var(--color-chart-3);
+    --chart-4: var(--color-chart-4);
+    --chart-5: var(--color-chart-5);
+    --radius: var(--radius-lg);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--background);
+    color: var(--foreground);
+    line-height: var(--leading-body-regular);
+    font-size: var(--text-body-regular);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    color: var(--color-text-primary);
+  }
+
+  h1 {
+    font-size: var(--text-hero-headline);
+    font-weight: var(--font-weight-hero-headline);
+    line-height: var(--leading-hero-headline);
+    letter-spacing: var(--tracking-hero-headline);
+  }
+
+  h2 {
+    font-size: var(--text-section-heading);
+    font-weight: var(--font-weight-section-heading);
+    line-height: var(--leading-section-heading);
+    letter-spacing: var(--tracking-section-heading);
+  }
+
+  h3 {
+    font-size: var(--text-subsection-heading);
+    font-weight: var(--font-weight-subsection-heading);
+    line-height: var(--leading-subsection-heading);
+    letter-spacing: var(--tracking-subsection-heading);
+  }
+
+  h4 {
+    font-size: var(--text-card-title);
+    font-weight: var(--font-weight-card-title);
+    line-height: var(--leading-card-title);
+    letter-spacing: var(--tracking-card-title);
+  }
+
+  p {
+    color: var(--color-text-secondary);
+    font-size: var(--text-body-regular);
+    line-height: var(--leading-body-regular);
+  }
+
+  a {
+    color: var(--color-brand-primary);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+    color: var(--color-brand-secondary);
+  }
+
+  .text-body-large {
+    font-size: var(--text-body-large);
+    font-weight: var(--font-weight-body-large);
+    line-height: var(--leading-body-large);
+    letter-spacing: var(--tracking-body-large);
+  }
+
+  .text-body-small {
+    font-size: var(--text-body-small);
+    font-weight: var(--font-weight-body-small);
+    line-height: var(--leading-body-small);
+    letter-spacing: var(--tracking-body-small);
+    color: var(--color-text-muted);
+  }
+
+  .text-cta-button {
+    font-size: var(--text-cta-button);
+    font-weight: var(--font-weight-cta-button);
+    line-height: var(--leading-cta-button);
+    letter-spacing: var(--tracking-cta-button);
+  }
+
+  .text-label-badge {
+    font-size: var(--text-label-badge);
+    font-weight: var(--font-weight-label-badge);
+    line-height: var(--leading-label-badge);
+    letter-spacing: var(--tracking-label-badge);
+    text-transform: uppercase;
+  }
+
+  .text-price-large {
+    font-size: var(--text-price-large);
+    font-weight: var(--font-weight-price-large);
+    line-height: var(--leading-price-large);
+    letter-spacing: var(--tracking-price-large);
+    color: var(--color-brand-primary);
+  }
+
+  .text-price-strikethrough {
+    font-size: var(--text-price-strikethrough);
+    font-weight: var(--font-weight-price-strikethrough);
+    line-height: var(--leading-price-strikethrough);
+    letter-spacing: var(--tracking-price-strikethrough);
+    color: var(--color-error);
+    text-decoration: line-through;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 16px; /* Mobile padding */
+    padding-right: 16px; /* Mobile padding */
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 24px; /* Tablet padding */
+      padding-right: 24px; /* Tablet padding */
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 32px; /* Desktop padding */
+      padding-right: 32px; /* Desktop padding */
+    }
+  }
+}
+
+/* Hide Next.js error overlay portal */
+nextjs-portal {
+  display: none !important;
+}
+@keyframes shine-smooth {
+  0% {
+    left: -30%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  30% {
+    left: 130%;
+    opacity: 0.8;
+  }
+  100% {
+    left: 130%;
+    opacity: 0;
+  }
+}
+
+/* 7 seconds per full cycle */
+.animate-shine-smooth {
+  animation: shine-smooth 5s ease-in-out infinite;
+}
+/* ---------- Seamless continuous marquee: row1 ← , row2 → ---------- */
+
+:root{
+  --marquee-duration-1: 16s; /* row 1 speed (leftwards) */
+  --marquee-duration-2: 16s; /* row 2 speed (rightwards) */
+  --marquee-item-w: 200px;   /* card width on mobile (match .tool-card width) */
+  --marquee-item-gap: 16px;  /* gap between cards */
+}
+
+/* item wrapper controls width + gap (duplicated in markup) */
+.marquee-item {
+  width: var(--marquee-item-w);
+  margin-right: var(--marquee-item-gap);
+  flex: 0 0 auto;
+}
+
+/* ensure the card fills wrapper */
+.marquee-item .tool-card {
+  width: 100%;
+  height: 110px; /* match your card height */
+  display: block;
+}
+
+/* wrapper hides overflow */
+.marquee {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* track: duplicated content A A */
+.marquee-track {
+  display: inline-flex;
+  align-items: center;
+  will-change: transform;
+}
+
+/* ROW 1 — unchanged (leftwards) */
+.marquee-left {
+  animation: marquee-left var(--marquee-duration-1) linear infinite;
+  transform: translate3d(0,0,0);
+}
+@keyframes marquee-left {
+  0%   { transform: translate3d(0,0,0); }
+  100%{ transform: translate3d(-50%,0,0); }
+}
+
+/* ROW 2 — start shifted left by 50% then animate to 0 -> seamless rightwards loop */
+.marquee-right {
+  /* start half-shifted so duplicate half follows immediately */
+  transform: translate3d(-50%, 0, 0);
+  animation: marquee-right var(--marquee-duration-2) linear infinite;
+}
+
+@keyframes marquee-right {
+  0%   { transform: translate3d(-50%, 0, 0); } /* start */
+  100% { transform: translate3d(0, 0, 0); }    /* end */
+}
+
+
+/* disable on md+ (desktop static layout) */
+@media (min-width: 768px) {
+  .marquee-track {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* performance hints + pause on touch */
+.marquee-track,
+.marquee-track > * {
+  backface-visibility: hidden;
+  -webkit-transform: translate3d(0,0,0);
+}
+.marquee:active .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
