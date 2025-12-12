@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { db } from "@/firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 const RAZORPAY_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
 const AMOUNT_PAISA = 99 * 100; // ₹99
@@ -37,14 +39,29 @@ export default function PaymentPage() {
     return Object.keys(e).length === 0;
   };
 
-  const saveAndContinue = (ev?: React.FormEvent) => {
-    ev?.preventDefault();
-    if (!validate()) return;
-    const data = { name: name.trim(), email: email.trim(), phone: phone.replace(/\D/g, "") };
-    localStorage.setItem("payment_user_info", JSON.stringify(data));
+ const saveAndContinue = async (ev?: React.FormEvent<HTMLFormElement>) => {
+  ev?.preventDefault();
+  if (!validate()) return;
+
+  try {
+    await addDoc(collection(db, "users"), {
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+    });
+await addDoc(collection(db, "users"), {
+  name: name.trim(),
+  email: email.trim(),
+  phone: phone.trim(),
+});
     setShowModal(false);
     setReadyForPayment(true);
-  };
+  } catch (error) {
+    console.error("Firestore save error:", error);
+    setShowModal(false);
+    setReadyForPayment(true);
+  }
+};
 
   const loadRazorpayScript = () =>
     new Promise((resolve, reject) => {

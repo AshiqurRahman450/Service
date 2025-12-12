@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image"; // keep if you use local images elsewhere
-import React from "react";
+import Image from "next/image";
+import React, { useEffect, useRef } from "react";
 
 interface Tool {
   name: string;
@@ -74,10 +74,10 @@ const ToolCard = ({ tool }: { tool: Tool }) => (
       transition-all duration-300
       hover:shadow-[0_3px_14px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.06)]
       p-3 flex-shrink-0
+      overflow-hidden
     "
   >
     <div className="relative z-10 flex flex-col items-center">
-      {/* Use <img> for remote assets to avoid next/image width/host checks */}
       <img
         src={tool.logo}
         alt={tool.alt}
@@ -94,8 +94,150 @@ const ToolCard = ({ tool }: { tool: Tool }) => (
 const ToolsSection = () => {
   const firstRow = tools.slice(0, 4);
   const secondRow = tools.slice(4);
-  const firstRowDup = [...firstRow, ...firstRow];
-  const secondRowDup = [...secondRow, ...secondRow];
+
+  // refs for marquee tracks
+  const leftRef = useRef<HTMLDivElement | null>(null);
+  const rightRef = useRef<HTMLDivElement | null>(null);
+
+ useEffect(() => {
+  const pxPerSecond = 30; // change to speed up/slow down
+  const minDurationSec = 3; // minimum safe duration
+
+  // keep refs to active web animations so we can cancel them
+  let leftAnimation: Animation | null = null;
+  let rightAnimation: Animation | null = null;
+  let resizeTimer: number | null = null;
+
+  function ensureDuplicated(trackEl: HTMLDivElement | null) {
+    if (!trackEl) return;
+    if (trackEl.dataset.duplicated === "true") return;
+    const children = Array.from(trackEl.children);
+    if (!children.length) return;
+    children.forEach((ch) => {
+      const clone = ch.cloneNode(true) as HTMLElement;
+      trackEl.appendChild(clone);
+    });
+    trackEl.dataset.duplicated = "true";
+  }
+
+  function stopAnimations() {
+    if (leftAnimation) { leftAnimation.cancel(); leftAnimation = null; }
+    if (rightAnimation) { rightAnimation.cancel(); rightAnimation = null; }
+  }
+
+  function createLoopingAnimation(trackEl: HTMLDivElement | null, pxDistance: number, durationSec: number) {
+    if (!trackEl) return null;
+    // make sure no conflicting CSS animation is running
+    trackEl.style.animation = "none";
+    // use web animations in pixels: from 0 -> -pxDistance (moves left). We'll adapt direction per track below.
+    const keyframes = [
+      { transform: "translate3d(0px,0,0)" },
+      { transform: `translate3d(${ -Math.round(pxDistance) }px,0,0)` },
+    ];
+    const anim = trackEl.animate(keyframes, {
+      duration: durationSec * 1000,
+      iterations: Infinity,
+      easing: "linear",
+    });
+    // ensure running
+    anim.play();
+    return anim;
+  }
+
+  function setupTracks() {
+    stopAnimations();
+
+    // LEFT track: move leftwards by one copy width
+    ensureDuplicated(leftRef.current);
+    ensureDuplicated(rightRef.current);
+
+    // Small guard: if refs not present, skip
+    if (!leftRef.current || !rightRef.current) return;
+
+    // compute pixel distance for one copy (total duplicated width / 2)
+    const leftTotal = leftRef.current.scrollWidth;
+    const rightTotal = rightRef.current.scrollWidth;
+    if (!leftTotal || !rightTotal) return;
+
+    const leftOneCopy = leftTotal / 2;
+    const rightOneCopy = rightTotal / 2;
+
+    // duration seconds based on pxPerSecond
+    const leftDur = Math.max(minDurationSec, leftOneCopy / pxPerSecond);
+    const rightDur = Math.max(minDurationSec, rightOneCopy / pxPerSecond);
+
+    // For left-moving row we want items to MOVE LEFT.
+    // We will start the track so visually the same as your CSS: set transform to 0 initially.
+    // Our web animation will animate from 0 -> -oneCopyPx and loop seamlessly.
+    leftRef.current.style.transform = "translate3d(0px,0,0)";
+    leftAnimation = createLoopingAnimation(leftRef.current, leftOneCopy, leftDur);
+
+    // For right-moving row we want items to MOVE RIGHT.
+    // Instead of making a negative-to-zero keyframe, we can animate from -oneCopy -> 0.
+    rightRef.current.style.transform = `translate3d(${-Math.round(rightOneCopy)}px,0,0)`;
+    // create animation from -oneCopy -> 0 by inverting keyframes
+    if (rightRef.current) {
+      // cancel CSS animation on the element
+      rightRef.current.style.animation = "none";
+      rightAnimation = rightRef.current.animate(
+        [
+          { transform: `translate3d(${-Math.round(rightOneCopy)}px,0,0)` },
+          { transform: "translate3d(0px,0,0)" },
+        ],
+        { duration: rightDur * 1000, iterations: Infinity, easing: "linear" }
+      );
+      rightAnimation.play();
+    }
+  }
+
+  // initial setup
+  setupTracks();
+
+  // debounce resize and recalc
+  function onResize() {
+    if (resizeTimer) window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      setupTracks();
+      resizeTimer = null;
+    }, 120);
+  }
+  window.addEventListener("resize", onResize);
+
+  // watch images inside tracks so we recalc when they load
+  function watchImages(trackEl: HTMLDivElement | null) {
+    if (!trackEl) return;
+    const imgs = Array.from(trackEl.querySelectorAll("img"));
+    imgs.forEach((img) => {
+      if ((img as HTMLImageElement).complete) return;
+      const cb = () => {
+        setupTracks();
+        img.removeEventListener("load", cb);
+        img.removeEventListener("error", cb);
+      };
+      img.addEventListener("load", cb);
+      img.addEventListener("error", cb);
+    });
+  }
+  watchImages(leftRef.current);
+  watchImages(rightRef.current);
+
+  // observe size changes as a fallback
+  const roLeft = leftRef.current ? new ResizeObserver(() => setupTracks()) : null;
+  const roRight = rightRef.current ? new ResizeObserver(() => setupTracks()) : null;
+  if (roLeft && leftRef.current) roLeft.observe(leftRef.current);
+  if (roRight && rightRef.current) roRight.observe(rightRef.current);
+
+  return () => {
+    // cleanup
+    stopAnimations();
+    window.removeEventListener("resize", onResize);
+    if (roLeft) roLeft.disconnect();
+    if (roRight) roRight.disconnect();
+    if (resizeTimer) window.clearTimeout(resizeTimer);
+  };
+}, []);
+
+
 
   return (
     <section className="relative overflow-hidden bg-[#010E0A] text-white">
@@ -104,21 +246,23 @@ const ToolsSection = () => {
           Tools You Will Learn
         </h2>
 
-          {/* Mobile marquee (seamless continuous) */}
+        {/* Mobile marquee (seamless continuous) */}
         <div className="md:hidden space-y-4">
           <div className="marquee">
-            <div className="marquee-track marquee-left">
-              {firstRowDup.map((t, i) => (
+            <div ref={leftRef} className="marquee-track marquee-left">
+              {firstRow.map((t, i) => (
                 <div key={`f-${i}`} className="marquee-item">
                   <ToolCard tool={t} />
                 </div>
               ))}
+              {/* If you already had duplicates in markup, this JS will detect and skip adding more.
+                  If not, the effect will clone these nodes into the track at runtime. */}
             </div>
           </div>
 
           <div className="marquee">
-            <div className="marquee-track marquee-right">
-              {secondRowDup.map((t, i) => (
+            <div ref={rightRef} className="marquee-track marquee-right">
+              {secondRow.map((t, i) => (
                 <div key={`s-${i}`} className="marquee-item">
                   <ToolCard tool={t} />
                 </div>

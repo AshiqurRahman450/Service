@@ -1,10 +1,17 @@
 /* Updated: 2025-10-15T11:10:51.447Z */
 /* Updated: 2025-10-15T11:08:26.578Z */
+/* globals.css */
+
+/* optional helpful debug: show which element is showing through
+body.debug-bg { background: hotpink; } 
+*/
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 @import "tailwindcss";
 @import "tw-animate-css";
 @custom-variant dark (&:is(.dark *));
+ 
 
 @theme {
   /* Shadcn/UI colors - Dark Theme */
@@ -347,81 +354,90 @@ nextjs-portal {
 .animate-shine-smooth {
   animation: shine-smooth 5s ease-in-out infinite;
 }
-/* ---------- Seamless continuous marquee: row1 ← , row2 → ---------- */
+/* ---------- Full-bleed marquee (forces flush left + preserves right inset) ---------- */
+/* ---------- Full-bleed marquee (forces flush left + preserves right inset) ---------- */
 
 :root{
-  --marquee-duration-1: 16s; /* row 1 speed (leftwards) */
-  --marquee-duration-2: 16s; /* row 2 speed (rightwards) */
-  --marquee-item-w: 200px;   /* card width on mobile (match .tool-card width) */
-  --marquee-item-gap: 16px;  /* gap between cards */
+  --marquee-duration-1: 40s;
+  --marquee-duration-2: 40s;
+  --marquee-item-w: 200px;
+  --marquee-item-gap: 16px;
 }
 
-/* item wrapper controls width + gap (duplicated in markup) */
+/* Full-bleed container: pull out of centered layout and span viewport */
+.marquee {
+  position: relative;
+
+  /* pull element full-bleed across viewport ignoring parent's container padding */
+  width: 100vw;
+  left: 50%;
+  margin-left: -50vw;
+
+  overflow: hidden;
+
+  /* remove left gap completely (flush left) */
+  padding-left: 0;
+
+  /* keep right-side inset so right edge remains perfect (adjustable) */
+  padding-right: calc((var(--marquee-item-w) / 2) - (var(--marquee-item-gap) / 2));
+
+  /* ensure padding doesn't interfere with animation math */
+  box-sizing: content-box;
+}
+
+/* track: duplicated inline-flex row */
+.marquee-track {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--marquee-item-gap);
+  will-change: transform;
+  white-space: nowrap; /* keep items on one line for duplication */
+}
+
+/* item sizing */
 .marquee-item {
   width: var(--marquee-item-w);
   margin-right: var(--marquee-item-gap);
   flex: 0 0 auto;
 }
 
-/* ensure the card fills wrapper */
-.marquee-item .tool-card {
-  width: 100%;
-  height: 110px; /* match your card height */
-  display: block;
+/* ensure tool-card fills wrapper */
+.marquee-item > * { width: 100%; display: block; height: 110px; }
+
+/* Both tracks start shifted -50% so first visible element is a full item */
+.marquee-left,
+.marquee-right {
+  transform: translate3d(-50%, 0, 0);
 }
 
-/* wrapper hides overflow */
-.marquee {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-}
-
-/* track: duplicated content A A */
-.marquee-track {
-  display: inline-flex;
-  align-items: center;
-  will-change: transform;
-}
-
-/* ROW 1 — unchanged (leftwards) */
+/* left-moving (continues leftwards) */
 .marquee-left {
   animation: marquee-left var(--marquee-duration-1) linear infinite;
-  transform: translate3d(0,0,0);
 }
 @keyframes marquee-left {
-  0%   { transform: translate3d(0,0,0); }
-  100%{ transform: translate3d(-50%,0,0); }
+  0%   { transform: translate3d(-50%, 0, 0); }
+  100% { transform: translate3d(-100%, 0, 0); }
 }
 
-/* ROW 2 — start shifted left by 50% then animate to 0 -> seamless rightwards loop */
+/* right-moving (moves rightwards) */
 .marquee-right {
-  /* start half-shifted so duplicate half follows immediately */
-  transform: translate3d(-50%, 0, 0);
   animation: marquee-right var(--marquee-duration-2) linear infinite;
 }
-
 @keyframes marquee-right {
-  0%   { transform: translate3d(-50%, 0, 0); } /* start */
-  100% { transform: translate3d(0, 0, 0); }    /* end */
+  0%   { transform: translate3d(-50%, 0, 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
 
-
-/* disable on md+ (desktop static layout) */
+/* keep desktop unchanged */
 @media (min-width: 768px) {
-  .marquee-track {
-    animation: none !important;
-    transform: none !important;
-  }
+  .marquee-track { animation: none !important; transform: none !important; }
 }
 
-/* performance hints + pause on touch */
-.marquee-track,
-.marquee-track > * {
+/* performance / pause on touch */
+.marquee-track, .marquee-track > * {
   backface-visibility: hidden;
   -webkit-transform: translate3d(0,0,0);
 }
-.marquee:active .marquee-track,
-.marquee:focus-within .marquee-track {
+.marquee:active .marquee-track, .marquee:focus-within .marquee-track {
   animation-play-state: paused;
 }
